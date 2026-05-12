@@ -13,14 +13,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ManutencaoRequestDto {
 
-    @NotBlank(message = "A descrição da manutenção não pode estar em branco.")
+    @NotNull(message = "O id do livro e obrigatorio.")
+    private Long livroId;
+
+    @NotBlank(message = "A descricao da manutencao nao pode estar em branco.")
     private String descricao;
 
-    @NotNull(message = "A data de início é obrigatória.")
+    @NotNull(message = "A data de inicio e obrigatoria.")
     private LocalDateTime dataInicio;
 
     private LocalDateTime dataTermino;
 
-    @NotBlank(message = "O status inicial é obrigatório.")
     private String status;
 }
