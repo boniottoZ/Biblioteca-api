@@ -18,6 +18,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <lombok.version>1.18.36</lombok.version>
     </properties>
 
     <dependencies>
@@ -47,6 +48,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -57,75 +59,85 @@
             <scope>test</scope>
         </dependency>
 
-        <!--  Swagger pelo SpringDoc -->
+        <!-- Swagger pelo SpringDoc -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.3.0</version>
         </dependency>
-		
-				<!-- Driver do PostgreSQL -->
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
-		</dependency>
 
-		<!-- Spring Boot Data JPA (inclui Hibernate) -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
+        <!-- Driver do PostgreSQL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
-		<!-- Dependência do MapStruct -->
-		<dependency>
-			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct</artifactId>
-			<version>1.5.5.Final</version>
-		</dependency>
+        <!-- Spring Boot Data JPA (inclui Hibernate) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
 
-		<!-- Processador de Anotação para gerar o código -->
-		<dependency>
-			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct-processor</artifactId>
-			<version>1.5.5.Final</version>
-			<scope>provided</scope>
-		</dependency>
-		
-		<!-- Dependência para Spring Boot reconhecer o Mapper -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok-mapstruct-binding</artifactId>
-			<version>0.2.0</version>
-			<scope>provided</scope>
-		</dependency>
+        <!-- Dependência do MapStruct -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.5.5.Final</version>
+        </dependency>
+
+        <!-- Processador de Anotação para gerar o código -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>1.5.5.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Dependência para Spring Boot reconhecer o Mapper -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok-mapstruct-binding</artifactId>
+            <version>0.2.0</version>
+            <scope>provided</scope>
+        </dependency>
 
     </dependencies>
 
     <build>
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-                <source>${java.version}</source>
-                <target>${java.version}</target>
-                <annotationProcessorPaths>
-                    <path>
-                        <groupId>org.mapstruct</groupId>
-                        <artifactId>mapstruct-processor</artifactId>
-                        <version>1.5.5.Final</version>
-                    </path>
-                </annotationProcessorPaths>
-            </configuration>
-        </plugin>
-        <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-        </plugin>
-    </plugins>
-</build>
-
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <!-- Lombok DEVE vir antes do MapStruct -->
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>0.2.0</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>1.5.5.Final</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
     <repositories>
         <repository>

@@ -30,4 +30,13 @@ public class Cliente {
  
     @Column(nullable = false, unique = true)
     private String documento;
+
+    // Getters adicionados manualmente devido a problema com Lombok
+    public String getEmail() {
+        return email;
+    }
+
+    public String getDocumento() {
+        return documento;
+    }
 }
