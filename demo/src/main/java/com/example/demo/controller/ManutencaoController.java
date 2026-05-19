@@ -4,6 +4,7 @@ import com.example.demo.dto.ManutencaoRequestDto;
 import com.example.demo.dto.ManutencaoResponseDto;
 import com.example.demo.service.ManutencaoService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/manutencoes")
@@ -27,25 +26,22 @@ public class ManutencaoController {
     }
 
     @PostMapping
-    public ResponseEntity<ManutencaoResponseDto> registrarManutencao(
-            @Valid @RequestBody ManutencaoRequestDto request
-    ) {
-        ManutencaoResponseDto response = manutencaoService.registrarManutencao(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<ManutencaoResponseDto> registrar(@RequestBody @Valid ManutencaoRequestDto request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(manutencaoService.registrar(request));
     }
 
     @GetMapping("/andamento")
-    public ResponseEntity<List<ManutencaoResponseDto>> listarManutencoesEmAndamento() {
-        return ResponseEntity.ok(manutencaoService.listarManutencoesEmAndamento());
+    public List<ManutencaoResponseDto> listarEmAndamento() {
+        return manutencaoService.listarEmAndamento();
     }
 
     @PatchMapping("/{id}/concluir")
-    public ResponseEntity<ManutencaoResponseDto> concluirManutencao(@PathVariable Long id) {
-        return ResponseEntity.ok(manutencaoService.concluirManutencao(id));
+    public ManutencaoResponseDto concluir(@PathVariable Long id) {
+        return manutencaoService.concluir(id);
     }
 
     @GetMapping("/livro/{livroId}")
-    public ResponseEntity<List<ManutencaoResponseDto>> consultarHistoricoPorLivro(@PathVariable Long livroId) {
-        return ResponseEntity.ok(manutencaoService.consultarHistoricoPorLivro(livroId));
+    public List<ManutencaoResponseDto> buscarHistoricoDoLivro(@PathVariable Long livroId) {
+        return manutencaoService.buscarHistoricoDoLivro(livroId);
     }
 }

@@ -1,102 +1,76 @@
 package com.example.demo.service;
 
-import com.example.demo.Entities.Livro;
-import com.example.demo.Entities.Manutencao;
 import com.example.demo.dto.ManutencaoRequestDto;
 import com.example.demo.dto.ManutencaoResponseDto;
+import com.example.demo.Entities.Livro;
+import com.example.demo.Entities.Manutencao;
+import com.example.demo.mapper.ManutencaoMapper;
 import com.example.demo.repository.ILivroRepository;
 import com.example.demo.repository.IManutencaoRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ManutencaoService {
 
     private static final String STATUS_EM_ANDAMENTO = "EM_ANDAMENTO";
-    private static final String STATUS_CONCLUIDA = "CONCLUIDA";
+    private static final String STATUS_CONCLUIDO = "CONCLUIDO";
 
     private final IManutencaoRepository manutencaoRepository;
     private final ILivroRepository livroRepository;
+    private final ManutencaoMapper manutencaoMapper;
 
     public ManutencaoService(
             IManutencaoRepository manutencaoRepository,
-            ILivroRepository livroRepository
-    ) {
+            ILivroRepository livroRepository,
+            ManutencaoMapper manutencaoMapper) {
         this.manutencaoRepository = manutencaoRepository;
         this.livroRepository = livroRepository;
+        this.manutencaoMapper = manutencaoMapper;
     }
 
     @Transactional
-    public ManutencaoResponseDto registrarManutencao(ManutencaoRequestDto request) {
+    public ManutencaoResponseDto registrar(ManutencaoRequestDto request) {
         Livro livro = livroRepository.findById(request.getLivroId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Livro nao encontrado."));
 
-        Manutencao manutencao = new Manutencao();
+        Manutencao manutencao = manutencaoMapper.toEntity(request);
         manutencao.setLivro(livro);
-        manutencao.setDescricao(request.getDescricao());
-        manutencao.setDataInicio(request.getDataInicio());
-        manutencao.setDataTermino(request.getDataTermino());
-        manutencao.setStatus(obterStatusInicial(request.getStatus()));
+        if (manutencao.getDataInicio() == null) {
+            manutencao.setDataInicio(LocalDateTime.now());
+        }
+        manutencao.setStatus(STATUS_EM_ANDAMENTO);
 
-        livro.setDisponibilidade(false);
-        livroRepository.save(livro);
-
-        return toResponseDto(manutencaoRepository.save(manutencao));
-    }
-
-    public List<ManutencaoResponseDto> listarManutencoesEmAndamento() {
-        return manutencaoRepository.findByStatus(STATUS_EM_ANDAMENTO)
-                .stream()
-                .map(this::toResponseDto)
-                .toList();
+        Manutencao salvo = manutencaoRepository.save(manutencao);
+        return manutencaoMapper.toResponseDTO(salvo);
     }
 
     @Transactional
-    public ManutencaoResponseDto concluirManutencao(Long id) {
+    public ManutencaoResponseDto concluir(Long id) {
         Manutencao manutencao = manutencaoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Manutencao nao encontrada."));
 
-        manutencao.setStatus(STATUS_CONCLUIDA);
+        manutencao.setStatus(STATUS_CONCLUIDO);
         manutencao.setDataTermino(LocalDateTime.now());
 
-        Livro livro = manutencao.getLivro();
-        livro.setDisponibilidade(true);
-        livroRepository.save(livro);
-
-        return toResponseDto(manutencaoRepository.save(manutencao));
+        Manutencao salvo = manutencaoRepository.save(manutencao);
+        return manutencaoMapper.toResponseDTO(salvo);
     }
 
-    public List<ManutencaoResponseDto> consultarHistoricoPorLivro(Long livroId) {
-        return manutencaoRepository.findByLivroId(livroId)
-                .stream()
-                .map(this::toResponseDto)
-                .toList();
+    public List<ManutencaoResponseDto> listarEmAndamento() {
+        return manutencaoRepository.findByStatus(STATUS_EM_ANDAMENTO).stream()
+                .map(manutencaoMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    private ManutencaoResponseDto toResponseDto(Manutencao manutencao) {
-        Livro livro = manutencao.getLivro();
-
-        return new ManutencaoResponseDto(
-                manutencao.getId(),
-                livro.getId(),
-                livro.getTitulo(),
-                manutencao.getDescricao(),
-                manutencao.getDataInicio(),
-                manutencao.getDataTermino(),
-                manutencao.getStatus()
-        );
-    }
-
-    private String obterStatusInicial(String status) {
-        if (status == null || status.isBlank()) {
-            return STATUS_EM_ANDAMENTO;
-        }
-
-        return status;
+    public List<ManutencaoResponseDto> buscarHistoricoDoLivro(Long livroId) {
+        return manutencaoRepository.findByLivroId(livroId).stream()
+                .map(manutencaoMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 }
